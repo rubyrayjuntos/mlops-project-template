@@ -41,7 +41,10 @@ stages:
               azureSubscription: $(ado_service_connection_rg)
               scriptType: "bash"
               scriptLocation: "inlineScript"
+              addSpnToEnvironment: true
               inlineScript: |
+                # Resolve the pipeline service principal object id for RBAC (graceful fallback to empty)
+                ADO_SP_OBJECT_ID=$(az ad sp show --id "$servicePrincipalId" --query id -o tsv 2>/dev/null || echo "")
                 az deployment sub validate \
                   --name $(Build.DefinitionName) \
                   --template-file ./infrastructure/bicep/main.bicep \
@@ -54,6 +57,8 @@ stages:
                     enableMonitoring=$(enable_monitoring) \
                     enableContainerRegistry=$(enable_container_registry) \
                     enableComputeCluster=$(enable_aml_computecluster) \
+                    amlComputeSku='$(aml_compute_sku)' \
+                    adoServicePrincipalId="$ADO_SP_OBJECT_ID" \
                     enableVNet=$(enable_vnet) \
                     vnetAddressPrefix='$(vnet_address_prefix)' \
                     defaultSubnetPrefix='$(default_subnet_prefix)' \
@@ -81,8 +86,11 @@ stages:
                     azureSubscription: $(ado_service_connection_rg)
                     scriptType: bash
                     scriptLocation: inlineScript
+                    addSpnToEnvironment: true
                     inlineScript: |
                       az --version
+                      # Resolve the pipeline service principal object id for RBAC (graceful fallback to empty)
+                      ADO_SP_OBJECT_ID=$(az ad sp show --id "$servicePrincipalId" --query id -o tsv 2>/dev/null || echo "")
                       echo "deploying bicep..."
                       az deployment sub create \
                         --name $(Build.DefinitionName) \
@@ -96,6 +104,8 @@ stages:
                           enableMonitoring=$(enable_monitoring) \
                           enableContainerRegistry=$(enable_container_registry) \
                           enableComputeCluster=$(enable_aml_computecluster) \
+                          amlComputeSku='$(aml_compute_sku)' \
+                          adoServicePrincipalId="$ADO_SP_OBJECT_ID" \
                           enableVNet=$(enable_vnet) \
                           vnetAddressPrefix='$(vnet_address_prefix)' \
                           defaultSubnetPrefix='$(default_subnet_prefix)' \

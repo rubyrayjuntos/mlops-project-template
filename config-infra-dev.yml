@@ -15,6 +15,9 @@ variables:
   enable_container_registry: true
   enable_vnet: false
 
+  # AML compute cluster VM size
+  aml_compute_sku: Standard_DS3_v2
+
   # VNet settings (only used when enable_vnet: true)
   vnet_address_prefix: '10.0.0.0/16'
   default_subnet_prefix: '10.0.0.0/24'
