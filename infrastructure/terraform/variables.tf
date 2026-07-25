@@ -49,11 +49,11 @@ variable "vnet_address_space" {
 variable "training_subnet_address_prefix" {
   type        = string
   description = "Address prefix for training/compute subnet (only used if enable_private_endpoints is true)"
-  default     = "10.0.0.0/24"
+  default     = "10.0.1.0/24"
 }
 
 variable "endpoints_subnet_address_prefix" {
   type        = string
   description = "Address prefix for private endpoints subnet (only used if enable_private_endpoints is true)"
-  default     = "10.0.1.0/24"
+  default     = "10.0.2.0/24"
 }
