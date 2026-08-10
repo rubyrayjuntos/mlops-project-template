@@ -10,6 +10,6 @@ environment:
   conda_file: online-conda.yml
 environment_variables:
   MONITORING_STORAGE_ACCOUNT: "REPLACE_AT_DEPLOY_TIME"
-instance_type: Standard_DS3_v2
+instance_type: Standard_DS2_v2
 instance_count: 1
 egress_public_network_access: enabled
