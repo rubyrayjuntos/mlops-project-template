@@ -141,7 +141,7 @@ jobs:
             echo "promoted=false" >> "$GITHUB_OUTPUT"
             exit 1
           fi
-          CHILD_NAME=$(az ml job list --parent-job-name "$RUN_NAME" --resource-group ${{ needs.get-config.outputs.resource_group }} --workspace-name ${{ needs.get-config.outputs.aml_workspace }} --query "[?display_name=='register-model'].name" -o tsv)
+          CHILD_NAME=$(az ml job list --parent-job-name "$RUN_NAME" --resource-group ${{ needs.get-config.outputs.resource_group }} --workspace-name ${{ needs.get-config.outputs.aml_workspace }} --query "[?display_name=='register_model'].name" -o tsv)
           rm -rf /tmp/promotion-check && mkdir -p /tmp/promotion-check
           az ml job download -n "$CHILD_NAME" --resource-group ${{ needs.get-config.outputs.resource_group }} --workspace-name ${{ needs.get-config.outputs.aml_workspace }} --download-path /tmp/promotion-check --output-name model_info_output_path || true
           if [ -f /tmp/promotion-check/named-outputs/model_info_output_path/model_info.json ]; then
