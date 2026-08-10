@@ -151,11 +151,17 @@ jobs:
   redeploy-batch:
     needs: check-promotion
     if: needs.check-promotion.outputs.promoted == 'true'
+    permissions:
+      id-token: write
+      contents: read
     uses: ./.github/workflows/deploy-batch-endpoint-pipeline-classical.yml
     secrets: inherit
 
   redeploy-online:
     needs: check-promotion
     if: needs.check-promotion.outputs.promoted == 'true'
+    permissions:
+      id-token: write
+      contents: read
     uses: ./.github/workflows/deploy-online-endpoint-pipeline-classical.yml
     secrets: inherit
