@@ -18,6 +18,11 @@ on:
         required: false
         type: boolean
         default: false
+  workflow_call:
+    outputs:
+      promoted:
+        description: "Whether a new model version was registered in this run"
+        value: ${{ jobs.check-promotion.outputs.promoted }}
 jobs:
   set-env-branch:
     runs-on: ubuntu-latest
@@ -110,3 +115,46 @@ jobs:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  check-promotion:
+    needs: [get-config, run-model-training-pipeline]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      promoted: ${{ steps.check.outputs.promoted }}
+    steps:
+      - name: azure-login
+        uses: azure/login@7184910d9eb2b1c5e48f7073824a90609bb9b6d6 # v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - id: check
+        run: |
+          az extension add -n ml -y
+          RUN_NAME="${{ needs.run-model-training-pipeline.outputs.run_name }}"
+          if [ -z "$RUN_NAME" ]; then
+            echo "::error::run-model-training-pipeline did not report a run_name - cannot safely check promotion"
+            echo "promoted=false" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+          CHILD_NAME=$(az ml job list --parent-job-name "$RUN_NAME" --resource-group ${{ needs.get-config.outputs.resource_group }} --workspace-name ${{ needs.get-config.outputs.aml_workspace }} --query "[?display_name=='register-model'].name" -o tsv)
+          rm -rf /tmp/promotion-check && mkdir -p /tmp/promotion-check
+          az ml job download -n "$CHILD_NAME" --resource-group ${{ needs.get-config.outputs.resource_group }} --workspace-name ${{ needs.get-config.outputs.aml_workspace }} --download-path /tmp/promotion-check --output-name model_info_output_path || true
+          if [ -f /tmp/promotion-check/named-outputs/model_info_output_path/model_info.json ]; then
+            echo "promoted=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "promoted=false" >> "$GITHUB_OUTPUT"
+          fi
+  redeploy-batch:
+    needs: check-promotion
+    if: needs.check-promotion.outputs.promoted == 'true'
+    uses: ./.github/workflows/deploy-batch-endpoint-pipeline-classical.yml
+    secrets: inherit
+
+  redeploy-online:
+    needs: check-promotion
+    if: needs.check-promotion.outputs.promoted == 'true'
+    uses: ./.github/workflows/deploy-online-endpoint-pipeline-classical.yml
+    secrets: inherit
