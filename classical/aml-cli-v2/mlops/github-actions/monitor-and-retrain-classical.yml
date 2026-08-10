@@ -59,5 +59,8 @@ jobs:
     # informational states (see check_drift.py's docstring) and must not be treated
     # as "no drift" - they mean the check didn't run a real comparison at all.
     if: needs.check-drift.outputs.monitoring_status == 'DRIFT_DETECTED'
+    permissions:
+      id-token: write
+      contents: read
     uses: ./.github/workflows/deploy-model-training-pipeline-classical.yml
     secrets: inherit
