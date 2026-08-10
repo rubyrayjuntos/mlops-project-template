@@ -45,7 +45,7 @@ SMOOTHING_EPSILON = 1e-4  # additive smoothing so unseen categories get nonzero 
 def parse_args():
     p = argparse.ArgumentParser("check_drift")
     p.add_argument("--storage_account", type=str, required=True)
-    p.add_argument("--container", type=str, default="azureml-blobstore")
+    p.add_argument("--container", type=str, default="monitoring")
     p.add_argument("--lookback_days", type=int, default=7)
     p.add_argument("--min_rows", type=int, default=30, help="Minimum recent inference rows before running tests at all")
     p.add_argument("--fdr_alpha", type=float, default=0.05, help="Benjamini-Hochberg FDR level")

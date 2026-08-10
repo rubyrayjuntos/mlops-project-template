@@ -52,7 +52,7 @@ def parse_args():
                          help="register_model's model_info_output_path - existence of model_info.json here IS the promotion signal")
     parser.add_argument("--model_name", type=str, required=True)
     parser.add_argument("--storage_account", type=str, required=True, help="Storage account name, e.g. stazmlops0001dev")
-    parser.add_argument("--container", type=str, default="azureml-blobstore", help="Blob container to write to")
+    parser.add_argument("--container", type=str, default="monitoring", help="Blob container to write to")
     return parser.parse_args()
 
 

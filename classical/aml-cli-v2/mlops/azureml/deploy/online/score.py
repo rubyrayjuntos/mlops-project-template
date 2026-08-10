@@ -29,7 +29,7 @@ def init():
         raise
 
     storage_account = os.environ.get("MONITORING_STORAGE_ACCOUNT")
-    container = os.environ.get("MONITORING_CONTAINER", "azureml-blobstore")
+    container = os.environ.get("MONITORING_CONTAINER", "monitoring")
     if storage_account:
         credential = DefaultAzureCredential(
             managed_identity_client_id=os.environ.get("DEFAULT_IDENTITY_CLIENT_ID")
