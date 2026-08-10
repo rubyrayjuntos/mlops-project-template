@@ -38,13 +38,18 @@ jobs:
           echo "config-file=$config_env" >> $GITHUB_OUTPUT;
   get-config:
     needs: set-env-branch
-    uses: Azure/mlops-templates/.github/workflows/read-yaml.yml@main
+    permissions:
+      contents: read
+    uses: rubyrayjuntos/mlops-templates/.github/workflows/read-yaml.yml@main
     with:
       file_name: ${{ needs.set-env-branch.outputs.config-file}}
   register-environment:
     needs: get-config
     if: ${{ !inputs.skip_environment_registration }}
-    uses: Azure/mlops-templates/.github/workflows/register-environment.yml@main
+    permissions:
+      id-token: write
+      contents: read
+    uses: rubyrayjuntos/mlops-templates/.github/workflows/register-environment.yml@main
     with:
       resource_group: ${{ needs.get-config.outputs.resource_group }}
       workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
@@ -57,7 +62,10 @@ jobs:
   register-dataset:
     needs: get-config
     if: ${{ !inputs.skip_data_registration }}
-    uses: Azure/mlops-templates/.github/workflows/register-dataset.yml@main
+    permissions:
+      id-token: write
+      contents: read
+    uses: rubyrayjuntos/mlops-templates/.github/workflows/register-dataset.yml@main
     with:
       resource_group: ${{ needs.get-config.outputs.resource_group }}
       workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
@@ -70,7 +78,10 @@ jobs:
   create-compute:
     needs: [get-config]
     if: ${{ !inputs.skip_compute_creation }}
-    uses: Azure/mlops-templates/.github/workflows/create-compute.yml@main
+    permissions:
+      id-token: write
+      contents: read
+    uses: rubyrayjuntos/mlops-templates/.github/workflows/create-compute.yml@main
     with:
       cluster_name: cpu-cluster
       size: Standard_D4s_v5
@@ -86,7 +97,10 @@ jobs:
   run-model-training-pipeline:
     needs: [get-config, register-environment, register-dataset, create-compute]
     if: ${{ !cancelled() && !failure() }}
-    uses: Azure/mlops-templates/.github/workflows/run-pipeline.yml@main
+    permissions:
+      id-token: write
+      contents: read
+    uses: rubyrayjuntos/mlops-templates/.github/workflows/run-pipeline.yml@main
     with:
       resource_group: ${{ needs.get-config.outputs.resource_group }}
       workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
