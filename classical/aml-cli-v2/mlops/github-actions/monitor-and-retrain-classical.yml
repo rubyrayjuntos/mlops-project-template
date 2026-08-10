@@ -1,0 +1,63 @@
+name: monitor-and-retrain
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"  # Mondays 06:00 UTC - adjust to your actual data velocity
+
+jobs:
+  set-env-branch:
+    runs-on: ubuntu-latest
+    outputs:
+      config-file: ${{ steps.set-output-defaults.outputs.config-file }}
+    steps:
+      - id: set-prod-branch
+        if: ${{ github.ref == 'refs/heads/main'}}
+        run: echo "config_env=config-infra-prod.yml" >> $GITHUB_ENV
+      - id: set-dev-branch
+        if: ${{ github.ref != 'refs/heads/main'}}
+        run: echo "config_env=config-infra-dev.yml" >> $GITHUB_ENV
+      - id: set-output-defaults
+        run: echo "config-file=$config_env" >> $GITHUB_OUTPUT
+
+  get-config:
+    needs: set-env-branch
+    permissions:
+      contents: read
+    uses: rubyrayjuntos/mlops-templates/.github/workflows/read-yaml.yml@main
+    with:
+      file_name: ${{ needs.set-env-branch.outputs.config-file }}
+
+  check-drift:
+    needs: get-config
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      monitoring_status: ${{ steps.drift.outputs.monitoring_status }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: azure/login@7184910d9eb2b1c5e48f7073824a90609bb9b6d6 # v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Set up Python
+        run: |
+          python3 -m pip install --quiet scipy pandas pyarrow azure-identity azure-storage-blob
+      - id: drift
+        run: |
+          # STORAGE_ACCOUNT: confirm the exact get-config output name from Task 7's investigation
+          OUTPUT=$(python3 data-science/src/check_drift.py --storage_account ${{ needs.get-config.outputs.storage_account }})
+          echo "$OUTPUT"
+          echo "monitoring_status=$(echo "$OUTPUT" | tail -1 | cut -d= -f2)" >> "$GITHUB_OUTPUT"
+
+  retrain:
+    needs: check-drift
+    # Only DRIFT_DETECTED triggers a retrain. NOT_READY and INSUFFICIENT_DATA are
+    # informational states (see check_drift.py's docstring) and must not be treated
+    # as "no drift" - they mean the check didn't run a real comparison at all.
+    if: needs.check-drift.outputs.monitoring_status == 'DRIFT_DETECTED'
+    uses: ./.github/workflows/deploy-model-training-pipeline-classical.yml
+    secrets: inherit
