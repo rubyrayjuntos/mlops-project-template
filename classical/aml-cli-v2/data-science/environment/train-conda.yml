@@ -13,6 +13,7 @@ dependencies:
       - azureml-mlflow==1.57.0
       - azure-ai-ml==1.23.0
       - azure-identity==1.19.0
+      - azure-storage-blob==12.19.0
       - azureml-core==1.57.0
       - numpy==1.26.4
       - pyarrow==14.0.2

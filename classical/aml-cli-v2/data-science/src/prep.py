@@ -118,6 +118,7 @@ def main(args):
 
     # Split data into train, val and test datasets
 
+    np.random.seed(42)
     random_data = np.random.rand(len(data))
 
     msk_train = random_data < 0.7

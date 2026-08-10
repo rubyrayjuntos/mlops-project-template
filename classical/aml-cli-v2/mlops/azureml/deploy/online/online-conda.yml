@@ -1,4 +1,4 @@
-name: taxi-batch-env
+name: taxi-online-env
 channels:
   - conda-forge
 dependencies:

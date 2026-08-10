@@ -10,6 +10,8 @@ inputs:
     path: azureml:taxi-data@latest
   enable_monitoring: 'false'
   table_name: 'taximonitoring'
+  storage_account:
+    type: string
 
 outputs:
   train_data:
@@ -98,4 +100,22 @@ jobs:
       evaluation_output: ${{parent.jobs.evaluate_model.outputs.evaluation_output}}
     outputs:
       model_info_output_path: ${{parent.outputs.model_info_output_path}}
+
+  snapshot_baseline:
+    name: snapshot_baseline
+    display_name: snapshot-baseline
+    code: ../../../data-science/src
+    command: >-
+      python snapshot_baseline.py
+      --test_data ${{inputs.test_data}}
+      --model_info_path ${{inputs.model_info_path}}
+      --model_name ${{inputs.model_name}}
+      --storage_account ${{inputs.storage_account}}
+    environment: azureml:taxi-train-env@latest
+    inputs:
+      test_data: ${{parent.jobs.prep_data.outputs.test_data}}
+      model_info_path: ${{parent.jobs.register_model.outputs.model_info_output_path}}
+      model_name: "taxi-model"
+      storage_account: ${{parent.inputs.storage_account}}
+    outputs: {}
 # </jobs>
