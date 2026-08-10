@@ -151,7 +151,7 @@ jobs:
           fi
   redeploy-batch:
     needs: check-promotion
-    if: needs.check-promotion.outputs.promoted == 'true'
+    if: ${{ !cancelled() && !failure() && needs.check-promotion.outputs.promoted == 'true' }}
     permissions:
       id-token: write
       contents: read
@@ -160,7 +160,7 @@ jobs:
 
   redeploy-online:
     needs: check-promotion
-    if: needs.check-promotion.outputs.promoted == 'true'
+    if: ${{ !cancelled() && !failure() && needs.check-promotion.outputs.promoted == 'true' }}
     permissions:
       id-token: write
       contents: read
