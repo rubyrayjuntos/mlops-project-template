@@ -41,7 +41,7 @@ jobs:
     needs: set-env-branch
     permissions:
       contents: read
-    uses: Azure/mlops-templates/.github/workflows/read-yaml.yml@main
+    uses: rubyrayjuntos/mlops-templates/.github/workflows/read-yaml.yml@8e0b74fc5caeef61d64dd95167ea6354783d1d1f
     with:
       file_name: ${{ needs.set-env-branch.outputs.config-file}}
   test-terraform-state-deployment:
@@ -49,7 +49,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    uses: Azure/mlops-templates/.github/workflows/tf-gha-install-terraform.yml@main
+    uses: rubyrayjuntos/mlops-templates/.github/workflows/tf-gha-install-terraform.yml@8e0b74fc5caeef61d64dd95167ea6354783d1d1f
     with:
       TFAction: ${{ github.event.inputs.action || 'apply' }}
       dply_environment: ${{ needs.set-env-branch.outputs.environment }}
@@ -57,8 +57,8 @@ jobs:
       namespace: ${{ needs.get-config.outputs.namespace }}
       postfix: ${{ needs.get-config.outputs.postfix }}
       environment: ${{ needs.get-config.outputs.environment }}
-      enable_aml_computecluster: ${{ needs.get-config.outputs.enable_aml_computecluster == true }} ## TODO review the evaluation of boolean
-      enable_monitoring: ${{ needs.get-config.outputs.enable_monitoring == true  }} ## TODO review the evaluation of boolean
+      enable_aml_computecluster: ${{ needs.get-config.outputs.enable_aml_computecluster == 'true' }}
+      enable_monitoring: ${{ needs.get-config.outputs.enable_monitoring == 'true' }}
       terraform_version: ${{ needs.get-config.outputs.terraform_version }}
       terraform_workingdir: ${{ needs.get-config.outputs.terraform_workingdir }}
       terraform_st_location: ${{ needs.get-config.outputs.terraform_st_location }}
