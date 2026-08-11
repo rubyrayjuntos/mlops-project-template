@@ -5,8 +5,9 @@ dependencies:
   - python=3.11
   - pip=25.0
   - pip:
-      - azureml-inference-server-http==1.4.1
+      - azureml-inference-server-http==1.2.0
       - mlflow==2.9.2
+      - setuptools<70
       - scikit-learn==1.5.2
       - numpy==1.26.4
       - cloudpickle==3.1.0
