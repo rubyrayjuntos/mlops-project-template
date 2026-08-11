@@ -177,7 +177,7 @@ resource "azurerm_machine_learning_compute_cluster" "adl_aml_ws_compute_cluster"
   scale_settings {
     min_node_count                       = 0
     max_node_count                       = 4
-    scale_down_nodes_after_idle_duration = "PT120S" # 120 seconds
+    scale_down_nodes_after_idle_duration = "PT2M"
   }
 }
 
