@@ -14,12 +14,28 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+def _resolve_model_path(model_dir):
+    if os.path.isfile(os.path.join(model_dir, "MLmodel")):
+        return model_dir
+
+    candidates = [
+        os.path.join(model_dir, entry)
+        for entry in os.listdir(model_dir)
+        if os.path.isfile(os.path.join(model_dir, entry, "MLmodel"))
+    ]
+    if len(candidates) != 1:
+        raise RuntimeError(
+            f"Expected exactly one MLflow model under {model_dir}, found {len(candidates)}"
+        )
+    return candidates[0]
+
+
 def init():
     global model, blob_service, storage_account, container
 
     model_dir = os.environ.get("AZUREML_MODEL_DIR")
     logger.info(f"AZUREML_MODEL_DIR: {model_dir}")
-    model_path = model_dir if model_dir else "./model"
+    model_path = _resolve_model_path(model_dir if model_dir else "./model")
 
     try:
         model = mlflow.pyfunc.load_model(model_path)
