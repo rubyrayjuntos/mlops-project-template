@@ -40,6 +40,8 @@ jobs:
       endpoint_file: mlops/azureml/deploy/online/online-endpoint.yml
       endpoint_name: ${{ format('taxi-gha-{0}', needs.get-config.outputs.oep) }}
       endpoint_type: online
+      storage_account_name: ${{ needs.get-config.outputs.storage_account }}
+      storage_container_name: monitoring
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
