@@ -13,6 +13,22 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+def _resolve_model_path(model_dir):
+    if os.path.isfile(os.path.join(model_dir, "MLmodel")):
+        return model_dir
+
+    candidates = [
+        os.path.join(model_dir, entry)
+        for entry in os.listdir(model_dir)
+        if os.path.isfile(os.path.join(model_dir, entry, "MLmodel"))
+    ]
+    if len(candidates) != 1:
+        raise RuntimeError(
+            f"Expected exactly one MLflow model under {model_dir}, found {len(candidates)}"
+        )
+    return candidates[0]
+
+
 def init():
     """
     Initialize the model for batch scoring.
@@ -24,15 +40,7 @@ def init():
     # For batch deployments, the model is in AZUREML_MODEL_DIR
     model_dir = os.environ.get("AZUREML_MODEL_DIR")
     logger.info(f"AZUREML_MODEL_DIR: {model_dir}")
-    
-    if model_dir:
-        # List contents to debug
-        logger.info(f"Contents of model directory: {os.listdir(model_dir)}")
-        
-        # The MLflow model should be directly in the model directory
-        model_path = model_dir
-    else:
-        model_path = "./model"
+    model_path = _resolve_model_path(model_dir if model_dir else "./model")
     
     # Load the MLflow model
     try:

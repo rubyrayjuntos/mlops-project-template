@@ -5,6 +5,7 @@ dependencies:
   - python=3.11
   - pip=25.0
   - pip:
+      - setuptools<70
       - mlflow==2.9.2
       - scikit-learn==1.5.2
       - numpy==1.26.4

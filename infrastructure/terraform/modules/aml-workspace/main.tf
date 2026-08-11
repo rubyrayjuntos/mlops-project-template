@@ -18,6 +18,18 @@ resource "azurerm_role_assignment" "mlw_uai_storage_blob_data_contributor" {
   principal_id         = azurerm_user_assigned_identity.mlw_uai.principal_id
 }
 
+resource "azurerm_role_assignment" "mlw_uai_storage_table_data_contributor" {
+  scope                = var.storage_account_id
+  role_definition_name = "Storage Table Data Contributor"
+  principal_id         = azurerm_user_assigned_identity.mlw_uai.principal_id
+}
+
+resource "azurerm_role_assignment" "mlw_uai_storage_queue_data_contributor" {
+  scope                = var.storage_account_id
+  role_definition_name = "Storage Queue Data Contributor"
+  principal_id         = azurerm_user_assigned_identity.mlw_uai.principal_id
+}
+
 resource "azurerm_role_assignment" "mlw_uai_storage_account_contributor" {
   scope                = var.storage_account_id
   role_definition_name = "Contributor"
@@ -63,6 +75,8 @@ resource "time_sleep" "wait_for_rbac_propagation" {
   depends_on = [
     azurerm_role_assignment.mlw_uai_storage_blob_data_reader,
     azurerm_role_assignment.mlw_uai_storage_blob_data_contributor,
+    azurerm_role_assignment.mlw_uai_storage_table_data_contributor,
+    azurerm_role_assignment.mlw_uai_storage_queue_data_contributor,
     azurerm_role_assignment.mlw_uai_storage_account_contributor,
     azurerm_role_assignment.mlw_uai_keyvault_reader,
     azurerm_role_assignment.mlw_uai_keyvault_secrets_user,
